@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum DeliveryMethod {
+  RETIRO_LOCAL
+  CADETE
+  CORREO_ARGENTINO
+}
+
+enum OrderStatus {
+  PENDIENTE_PAGO
+  CONFIRMADO
+  PREPARADO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+}
+
+// Singleton: siempre se usa el id "singleton"
+model StoreConfig {
+  id             String @id @default("singleton")
+  minUnits       Int    @default(10)
+  whatsappNumber String @default("")
+  bankHolder     String @default("")
+  bankName       String @default("")
+  bankCbu        String @default("")
+  bankAlias      String @default("")
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  images      String[]
+  isVisible   Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  variants    ProductVariant[]
+}
+
+model ProductVariant {
+  id           String  @id @default(cuid())
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name         String
+  price        Float
+  stock        Int     @default(0)
+  unitsPerPack Int     @default(1)
+  isVisible    Boolean @default(true)
+  sortOrder    Int     @default(0)
+
+  @@index([productId])
+}
+
+model Order {
+  id             String         @id @default(cuid())
+  orderNumber    Int            @unique @default(autoincrement())
+  orderCode      String         @unique
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  province       String
+  city           String
+  address        String?
+  postalCode     String?
+  reference      String?
+  deliveryMethod DeliveryMethod
+  status         OrderStatus    @default(PENDIENTE_PAGO)
+  isPaid         Boolean        @default(false)
+  subtotal       Float
+  totalUnits     Int
+  createdAt      DateTime       @default(now())
+  items          OrderItem[]
+
+  @@index([createdAt])
+}
+
+// productId / variantId son snapshots (sin FK) para que el historial sobreviva si se borra el producto
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  order        Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  variantId    String
+  productName  String
+  variantName  String
+  quantity     Int
+  unitsPerPack Int
+  unitPrice    Float
+  subtotal     Float
+
+  @@index([orderId])
+}
