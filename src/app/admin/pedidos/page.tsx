@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { OrderControls, STATUS_LABELS } from "@/components/admin/order-controls";
+import { OrderControls } from "@/components/admin/order-controls";
+import { STATUS_LABELS } from "@/lib/order-status";
 import { DELIVERY_SHORT_LABEL } from "@/lib/delivery";
 import { formatPrice } from "@/lib/utils";
 

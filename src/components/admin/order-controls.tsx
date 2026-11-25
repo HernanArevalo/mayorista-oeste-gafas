@@ -2,18 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { OrderStatus } from "@prisma/client";
 import { updateOrder } from "@/app/actions/admin";
 import { Select } from "@/components/ui/select";
+import type { OrderStatus } from "@prisma/client";
+import { STATUS_LABELS } from "@/lib/order-status";
 
-export const STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDIENTE_PAGO: "Pendiente de pago",
-  CONFIRMADO: "Confirmado",
-  PREPARADO: "Preparado",
-  ENVIADO: "Enviado",
-  ENTREGADO: "Entregado",
-  CANCELADO: "Cancelado",
-};
 
 export function OrderControls({ id, status, isPaid }: { id: string; status: OrderStatus; isPaid: boolean }) {
   const router = useRouter();
